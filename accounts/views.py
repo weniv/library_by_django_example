@@ -30,21 +30,28 @@ def register_view(request): # rqeuest: 요청 객체
 
 def login_view(request):
     """로그인 뷰"""
-    if request.user.is_authenticated: # 로그인 상태인 경우
-        return redirect(reverse_lazy('accounts:profile')) # 프로필 페이지로 이동
+    if request.user.is_authenticated:
+        print("User is already authenticated")
+        return redirect(reverse_lazy('accounts:profile'))
         
     if request.method == 'POST':
-        form = LoginForm(request, request.POST) # 로그인 폼 생성
-        if form.is_valid(): # 유효성 검사
-            login(request, form.get_user()) # 로그인
-            # next 파라미터가 있으면 해당 URL로 리다이렉트 아니면 프로필 페이지로 이동
+        print("POST data received:", request.POST)  # POST 데이터 확인
+        form = LoginForm(request, request.POST)
+        if form.is_valid():
+            print("Form is valid")
+            user = form.get_user()
+            print("User object:", user)  # 유저 객체 확인
+            login(request, user)
+            print("User logged in successfully")
             next_url = request.GET.get('next', reverse_lazy('accounts:profile'))
-            print(next_url)
+            print("Redirecting to:", next_url)
             return redirect(next_url)
-    else: # GET 요청인 경우
-        form = LoginForm() # 로그인 폼 생성
-    print(form)
-    return render(request, 'accounts/login.html', {'form': form}) # 로그인 페이지 렌더링
+        else:
+            print("Form validation errors:", form.errors)  # 폼 에러 확인
+    else:
+        form = LoginForm()
+    
+    return render(request, 'accounts/login.html', {'form': form})
 
 def logout_view(request):
     """로그아웃 뷰"""

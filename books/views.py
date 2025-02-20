@@ -8,23 +8,59 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from django.contrib.auth.decorators import login_required
-
+from django.core.cache import cache
+from django.conf import settings
+import logging
 # Create your views here.
-
+logger = logging.getLogger(__name__)
 
 def book_list(request):
     """도서 목록 및 검색"""
-    query = request.GET.get('query', '')  # 검색어
+    query = request.GET.get('query', '')
+    use_cache = request.GET.get('cache', 'true') == 'true'
+    
+    start_time = timezone.now()
+    
     if query:
-        books = Book.objects.filter(
-            models.Q(title__icontains=query) |  # 제목 검색
-            models.Q(author__icontains=query) |  # 저자 검색
-            models.Q(isbn__icontains=query)  # ISBN 검색
-        )
+        books = list(Book.objects.filter(
+            models.Q(title__icontains=query) |
+            models.Q(author__icontains=query) |
+            models.Q(isbn__icontains=query)
+        ))
+        cache_status = "검색어가 있어 캐시 미사용"
     else:
-        books = Book.objects.all()  # 전체 도서 목록
-    # 도서 목록 템플릿 렌더링
-    return render(request, 'books/book_list.html', {'books': books, 'query': query})
+        cache_key = 'all_books'
+        
+        if use_cache:
+            books = cache.get(cache_key)
+            if books is None:
+                # QuerySet을 리스트로 변환하여 실제 데이터를 캐시에 저장
+                books = list(Book.objects.all())
+                cache.set(cache_key, books, settings.CACHE_TTL)
+                cache_status = "캐시 미스 (DB 조회)"
+            else:
+                cache_status = "캐시 히트"
+        else:
+            # QuerySet을 리스트로 변환하여 실제 데이터를 가져옴
+            books = list(Book.objects.all())
+            cache_status = "캐시 미사용"
+    
+    end_time = timezone.now()
+    elapsed_time = end_time - start_time
+    
+    # books가 이미 리스트이므로 len() 사용
+    logger.warning(f'도서 목록 조회 성능: '
+                  f'캐시상태={cache_status}, '
+                  f'도서수={len(books)}, '
+                  f'소요시간={elapsed_time.total_seconds():.4f}초')
+    
+    return render(request, 'books/book_list.html', {
+        'books': books,
+        'query': query,
+        'elapsed_time': elapsed_time.total_seconds(),
+        'cache_status': cache_status,
+        'use_cache': use_cache
+    })
 
 
 def book_detail(request, pk):
