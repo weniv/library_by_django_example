@@ -1,0 +1,30 @@
+name: Django CI  # GitHub Actions에서 표시될 워크플로우 이름
+
+# 워크플로우가 실행될 조건
+on:
+  push:
+    branches: [ finished ]  # main 브랜치에 push할 때
+  pull_request:
+    branches: [ finished ]  # main 브랜치로 PR 생성할 때
+
+# 실행될 작업 정의
+jobs:
+  build:
+    runs-on: ubuntu-latest  # Ubuntu 최신 버전에서 실행
+
+    steps:
+    # 1. 코드 가져오기
+    - name: 코드 체크아웃
+      uses: actions/checkout@v4
+
+    # 2. Docker 설정
+    - name: Docker Compose 실행
+      run: docker compose up -d --build
+
+    # 3. Django 테스트
+    - name: Django 테스트 실행
+      run: docker compose exec -T web python manage.py test
+
+    # 4. 정리
+    - name: Docker 정리
+      run: docker compose down
