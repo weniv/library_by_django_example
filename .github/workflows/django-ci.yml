@@ -1,34 +1,41 @@
-name: Django CI
+name: Django CI  # GitHub Actions에서 표시될 워크플로우 이름
 
+# 워크플로우가 실행될 조건
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # main 브랜치에 push할 때
   pull_request:
-    branches: [ main ]
+    branches: [ main ]  # main 브랜치로 PR 생성할 때
 
+# 실행될 작업 정의
 jobs:
   build:
-    runs-on: ubuntu-latest
-    
+    runs-on: ubuntu-latest  # Ubuntu 최신 버전에서 실행
+
     steps:
+    # 1. 코드 가져오기
     - name: 코드 체크아웃
       uses: actions/checkout@v4
-    
-    # .env 파일 생성 (시크릿 값들을 사용)
+      
+    # 2. .env 파일 생성 (시크릿 값들을 사용)
     - name: Create .env file
       run: |
-        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+	      # 파일을 새로 생성 (>)
+        echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
+        # 기존 파일에 추가 (>>)
         echo "DB_USER=${{ secrets.DB_USER }}" >> .env
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
         echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
         echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
-    
+
+    # 3. Docker 설정
     - name: Docker Compose 실행
       run: docker compose up -d --build
-    
+
+    # 4. Django 테스트
     - name: Django 테스트 실행
-      run: |
-        docker compose exec -T web python manage.py test
-    
+      run: docker compose exec -T web python manage.py test
+
+    # 5. 정리
     - name: Docker 정리
       run: docker compose down
