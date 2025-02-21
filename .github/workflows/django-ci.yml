@@ -20,7 +20,7 @@ jobs:
     # .env 파일 생성 (시크릿 값들을 사용)
     - name: Create .env file
       run: |
-        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
         echo "DB_USER=${{ secrets.DB_USER }}" >> .env
         echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
         echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
