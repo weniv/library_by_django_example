@@ -26,6 +26,8 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+    env_file:
+      - ./.env
 
   redis:
     image: redis:latest
