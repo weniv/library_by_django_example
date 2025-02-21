@@ -17,16 +17,14 @@ jobs:
     - name: 코드 체크아웃
       uses: actions/checkout@v4
       
-    # 2. .env 파일 생성 (시크릿 값들을 사용)
+    # .env 파일 생성 (시크릿 값들을 사용)
     - name: Create .env file
       run: |
-          # 파일을 새로 생성 (>)
-          echo "DB_NAME=${{ secrets.DB_NAME }}" > .env
-          # 기존 파일에 추가 (>>)
-          echo "DB_USER=${{ secrets.DB_USER }}" >> .env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
-          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
-          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+        echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+        echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+        echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+        echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env
+        echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
 
     # 3. Docker 설정
     - name: Docker Compose 실행
