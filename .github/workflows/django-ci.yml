@@ -3,7 +3,7 @@ name: Django CI  # GitHub Actions에서 표시될 워크플로우 이름
 # 워크플로우가 실행될 조건
 on:
   push:
-    branches: [ main ]  # main 브랜치에 push할 때
+    branches: [ finished ]  # main 브랜치에 push할 때
   pull_request:
     branches: [ main ]  # main 브랜치로 PR 생성할 때
 
