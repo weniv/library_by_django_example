@@ -64,6 +64,11 @@ jobs:
         ssh -i ~/.ssh/aws.pem -o StrictHostKeyChecking=no $USER@$HOST '
           cd ~/app/library_by_django_example &&
           git pull origin finished &&
+          echo "DB_NAME=${{ secrets.DB_NAME }}" > .env &&
+          echo "DB_USER=${{ secrets.DB_USER }}" >> .env &&
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env &&
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> .env &&
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env &&
           docker compose down &&
           docker compose up -d --build
         '
