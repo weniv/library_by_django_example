@@ -37,3 +37,33 @@ jobs:
     # 5. 정리
     - name: Docker 정리
       run: docker compose down
+      
+  cd:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/finished'  # main 브랜치에 push될 때만 배포
+    
+    steps:
+    - name: 코드 체크아웃
+      uses: actions/checkout@v4
+
+    # EC2 접속을 위한 SSH 키 설정
+    - name: SSH 키 설정
+      env:
+        PRIVATE_KEY: ${{ secrets.AWS_PRIVATE_KEY }}
+      run: |
+        mkdir -p ~/.ssh
+        echo "$PRIVATE_KEY" > ~/.ssh/aws.pem
+        chmod 600 ~/.ssh/aws.pem
+        
+    # EC2에 배포
+    - name: EC2에 배포
+      env:
+        HOST: ${{ secrets.EC2_HOST }}
+        USER: ${{ secrets.EC2_USER }}
+      run: |
+        ssh -i ~/.ssh/aws.pem -o StrictHostKeyChecking=no $USER@$HOST '
+          cd ~/app/library_by_django_example &&
+          git pull origin finished &&
+          docker compose down &&
+          docker compose up -d --build
+        '
